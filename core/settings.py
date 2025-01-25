@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'djoser',
     'django_apscheduler',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -215,11 +216,17 @@ LOGIN_URL = '/login/'  # или путь, где у вас находится с
 
 LOGIN_REDIRECT_URL = '/todo/'  # Страница, на которую перенаправляются пользователи после входа
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_BROKER_URL = 'redis://127.0.0.1:16379/0'
 
+CELERY_RESULT_BACKEND = 'django-cache'
 
+# pick which cache from the CACHES setting.
+CELERY_CACHE_BACKEND = 'default'
 
-
-
-
-
+# django setting.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:16379/1',
+    }
+}

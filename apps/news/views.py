@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthentic
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from celery import shared_task
 
 # Create your views here.
 from apps.news.models import User, ToDo
@@ -138,3 +139,7 @@ class CustomLoginView(LoginView):
             # Сессия будет длиться (например) 2 недели
             self.request.session.set_expiry(settings.SESSION_COOKIE_AGE)
         return response
+
+@shared_task
+def bar():
+    return "Hello, world!"
