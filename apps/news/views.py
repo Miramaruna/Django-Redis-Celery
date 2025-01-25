@@ -26,12 +26,14 @@ class Pagination(PageNumberPagination):
 @shared_task
 def delete_all_todos_task():
     ToDo.objects.all().delete()
+    time.sleep(0.2)
     return redirect('/todo/')
 
 @shared_task
 def create_todo_task(user_id, title):
     user = User.objects.get(id=user_id)
     ToDo.objects.create(user=user, title=title)
+    time.sleep(0.2)
     return redirect('/todo/')
 
 @shared_task
@@ -39,12 +41,14 @@ def mark_completed_task(todo_id):
     todo = ToDo.objects.get(id=todo_id)
     todo.is_completed = True
     todo.save()
+    time.sleep(0.2)
     return redirect('/todo/')
 
 @shared_task
 def delete_todo_task(todo_id):
     todo = ToDo.objects.get(id=todo_id)
     todo.delete()
+    time.sleep(0.2)
     return redirect('/todo/')
 
 # Views
