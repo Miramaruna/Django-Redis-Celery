@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView
 from django.conf import settings
 from celery import shared_task
+import time
 
 from apps.news.models import User, ToDo
 from apps.news.serializers import (

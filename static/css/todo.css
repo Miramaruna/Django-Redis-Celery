@@ -187,3 +187,11 @@
             0% { opacity: 0; }
             100% { opacity: 1; }
         }
+        .task-number {
+            margin-right: 10px;
+            font-weight: bold;
+            display: inline-block;
+            width: 30px; /* Увеличьте ширину для лучшей видимости */
+            color: #000; /* Цвет текста */
+            font-size: 16px; /* Размер шрифта */
+        }
