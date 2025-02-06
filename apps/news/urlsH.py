@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.news.views import delete_todo_task, create_todo_task, mark_completed_task, todohome, mark_completed, delete_todo, login_view, register, main, CustomLogoutView
+from apps.news.views import delete_todo_task, create_todo_task, mark_completed_task, todohome, mark_completed, delete_todo, login_view, register, main, CustomLogoutView, mark_uncompleted_task
 from django_prometheus import exports
 
 urlpatterns = [
@@ -12,4 +12,5 @@ urlpatterns = [
     path('create_todo_task/', create_todo_task, name='create_todo_task'),
     path('metrics/', exports.ExportToDjangoView, name='prometheus-metrics'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
+    path('mark_uncompleted_task/<int:todo_id>/', mark_uncompleted_task, name='mark_uncompleted_task'),
 ]

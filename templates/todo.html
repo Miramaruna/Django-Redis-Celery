@@ -52,6 +52,12 @@
                             {% csrf_token %}
                             <button type="submit" class="complete-btn">
                                 {% if todo.is_completed %}
+                                    <!-- <form method="post" action="{% url 'mark_uncompleted_task' todo.id %}" class="inline-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="undo-btn">
+                                            <i class="fas fa-undo"></i> Отменить
+                                        </button>
+                                    </form>                                 -->
                                     <i class="fas fa-undo"></i> Отменить
                                 {% else %}
                                     <i class="fas fa-check"></i> Выполнено

@@ -58,6 +58,14 @@ def mark_completed_task(todo_id):
     return f"Todo {todo_id} marked as completed"
 
 @shared_task
+def mark_uncompleted_task(todo_id):
+    todo = ToDo.objects.get(id=todo_id)
+    todo.is_completed = False
+    todo.save()
+    time.sleep(0.2)
+    return f"Todo {todo_id} marked as uncompleted"
+
+@shared_task
 def delete_todo_task(todo_id):
     todo = ToDo.objects.get(id=todo_id)
     todo.delete()
