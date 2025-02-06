@@ -17,7 +17,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = ['192.168.1.104', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['192.168.1.104', '127.0.0.1', 'localhost', '58a8-92-245-115-26.ngrok-free.app']
 
 
 # Application definition
@@ -207,6 +207,10 @@ LOGIN_URL = '/login/'  # или путь, где у вас находится с
 
 LOGIN_REDIRECT_URL = '/todo/'  # Страница, на которую перенаправляются пользователи после входа
 
+LOGOUT_REDIRECT_URL = '/login/'  # Страница, на которую перенаправляются пользователи после выхода
+
+LOGOUT_REDIRECT_URL = 'home/'
+
 CELERY_BROKER_URL = 'redis://127.0.0.1:16379/0'
 
 CELERY_RESULT_BACKEND = 'django-cache'
@@ -221,3 +225,11 @@ CACHES = {
         'LOCATION': 'redis://127.0.0.1:16379/1',
     }
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://58a8-92-245-115-26.ngrok-free.app"
+]
+
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = None

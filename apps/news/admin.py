@@ -11,6 +11,6 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(ToDo)
 class ToDonAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'description', 'created_at', 'is_completed']
-    list_filter = ['id', 'title', 'description', 'created_at', 'is_completed']
-    search_fields = ['id', 'title', 'description', 'created_at', 'is_completed']
+    list_display = ['id', 'title', 'created_at', 'is_completed']
+    list_filter = ['id', 'title', 'created_at', 'is_completed']
+    search_fields = ['id', 'title', 'created_at', 'is_completed']

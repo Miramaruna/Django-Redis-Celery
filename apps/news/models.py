@@ -37,9 +37,6 @@ class ToDo(models.Model):
         verbose_name='Заголовок',
         max_length=50
     )
-    description = models.TextField(
-        verbose_name='описание'
-        )
     is_completed = models.BooleanField(
         verbose_name='Выполнено',
         null=True,

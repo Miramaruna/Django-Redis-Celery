@@ -1,14 +1,17 @@
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import RetrieveAPIView, CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.views import LoginView
 from django.conf import settings
 from celery import shared_task
+from django.utils.decorators import method_decorator
+from django.contrib.auth.views import LogoutView
+from django.views.decorators.csrf import csrf_exempt
 import time
 
 from apps.news.models import User, ToDo
@@ -17,6 +20,10 @@ from apps.news.serializers import (
     ToDoSerializer, CreateToDoSerializers
 )
 from apps.news.forms import CustomAuthenticationForm
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CustomLogoutView(LogoutView):
+    pass
 
 # Pagination settings
 class Pagination(PageNumberPagination):
@@ -28,14 +35,19 @@ class Pagination(PageNumberPagination):
 def delete_all_todos_task():
     ToDo.objects.all().delete()
     time.sleep(0.2)
-    return redirect('/todo/')
+    return "All todos deleted"
 
 @shared_task
 def create_todo_task(user_id, title):
     user = User.objects.get(id=user_id)
-    ToDo.objects.create(user=user, title=title)
-    time.sleep(0.2)
-    return redirect('/todo/')
+    if len(title) >= 40:
+        return 'Task is too long'
+    elif len(title) <= 1:
+        return 'Task is too short'
+    else:
+        ToDo.objects.create(user=user, title=title)
+        time.sleep(0.2)
+        return f"Todo created: {title}"
 
 @shared_task
 def mark_completed_task(todo_id):
@@ -43,16 +55,16 @@ def mark_completed_task(todo_id):
     todo.is_completed = True
     todo.save()
     time.sleep(0.2)
-    return redirect('/todo/')
+    return f"Todo {todo_id} marked as completed"
 
 @shared_task
 def delete_todo_task(todo_id):
     todo = ToDo.objects.get(id=todo_id)
     todo.delete()
     time.sleep(0.2)
-    return redirect('/todo/')
+    return f"Todo {todo_id} deleted"
 
-# Views
+# API Views
 class DeleteAllToDoApiView(ListAPIView):
     queryset = ToDo.objects.all()
     permission_classes = [IsAdminUser]
@@ -66,10 +78,12 @@ class UserCreateAPIView(CreateAPIView):
     serializer_class = UserRegisterSerializer
 
 class UserApiView(ListAPIView):
-    queryset = User.objects.all()
     serializer_class = UserSerializers
     pagination_class = Pagination
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return User.objects.filter(id=self.request.user.id)
 
 class TodoCreateApiView(CreateAPIView):
     queryset = ToDo.objects.all()
@@ -82,11 +96,14 @@ class TodoCreateApiView(CreateAPIView):
         create_todo_task.delay(user_id, title)
 
 class ToDoApiView(ListAPIView):
-    queryset = ToDo.objects.all()
     serializer_class = ToDoSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = Pagination
 
+    def get_queryset(self):
+        return ToDo.objects.filter(user=self.request.user)
+
+# Django Views
 @login_required
 def todohome(request):
     todos = ToDo.objects.filter(user=request.user)[:15]
@@ -138,19 +155,12 @@ def login_view(request):
     return render(request, 'login.html')
 
 def main(request):
+    if not request.user.is_authenticated:  # Если пользователь не авторизован
+        if not request.COOKIES.get('first_visit'):  # Проверяем cookie
+            response = redirect('home')  # Перенаправляем на страницу приветствия
+            response.set_cookie('first_visit', 'true', max_age=365*24*60*60)  # Устанавливаем cookie
+            return response
+        return redirect('/login/')  # Если не первый визит, но не авторизован, отправляем на логин
+    else:  # Если пользователь авторизован
+        return redirect('todo')  # Перенаправляем на страницу задач
     return render(request, 'home.html')
-
-class CustomLoginView(LoginView):
-    form_class = CustomAuthenticationForm
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        if not form.cleaned_data.get('remember_me'):
-            self.request.session.set_expiry(0)
-        else:
-            self.request.session.set_expiry(settings.SESSION_COOKIE_AGE)
-        return response
-
-@shared_task
-def bar():
-    return "Hello, world!"
